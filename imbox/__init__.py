@@ -1,6 +1,8 @@
 from imbox.imap import ImapTransport
 from imbox.parser import parse_email
+from imbox.parser import parse_folders
 from imbox.query import build_search_query
+from imbox.imap_utf7 import encode
 
 class Imbox(object):
 
@@ -54,9 +56,13 @@ class Imbox(object):
         folder = kwargs.get('folder', False)
         
         if folder:
+            folder = encode(folder)
             self.connection.select(folder)
 
         return self.fetch_list(**kwargs)
-        
+    
+    @property   
     def folders(self):
-        return self.connection.list()
+        status, folders = self.connection.list()
+        folders = parse_folders(folders)
+        return folders
